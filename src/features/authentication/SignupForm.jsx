@@ -13,7 +13,9 @@ import { useHotel } from "../../context/HotelContext";
 function SignupForm() {
   const { signup, isLoading } = useSignup();
   const { hotelId, role: currentRole } = useHotel();
-  const { register, formState, getValues, handleSubmit, reset } = useForm();
+  const { register, formState, getValues, handleSubmit, reset } = useForm({
+    defaultValues: { role: "front_desk" },
+  });
   const { errors } = formState;
 
   function onSubmit({ fullName, email, password, role }) {

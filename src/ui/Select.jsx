@@ -1,4 +1,5 @@
 //筛选过滤
+import { forwardRef } from "react";
 import styled from "styled-components";
 
 const StyledSelect = styled.select.withConfig({
@@ -17,9 +18,12 @@ const StyledSelect = styled.select.withConfig({
   box-shadow: var(--shadow-sm);
 `;
 
-function Select({ options, value, onChange, ...props }) {
+const Select = forwardRef(function Select(
+  { options, value, onChange, ...props },
+  ref,
+) {
   return (
-    <StyledSelect value={value} onChange={onChange} {...props}>
+    <StyledSelect ref={ref} value={value} onChange={onChange} {...props}>
       {options.map((option) => (
         <option value={option.value} key={option.value}>
           {option.label}
@@ -27,6 +31,6 @@ function Select({ options, value, onChange, ...props }) {
       ))}
     </StyledSelect>
   );
-}
+});
 
 export default Select;
