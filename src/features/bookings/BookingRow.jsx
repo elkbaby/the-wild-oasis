@@ -18,6 +18,8 @@ import { formatCurrency } from "../../utils/helpers";
 import { formatDistanceFromNow } from "../../utils/helpers";
 import { useCheckout } from "../check-in-out/useCheckout";
 import { useDeleteBooking } from "./useDeleteBooking";
+import Can from "../../ui/Can";
+import { PERMISSIONS } from "../hotels/permissions";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -49,11 +51,9 @@ const Amount = styled.div`
 function BookingRow({
   booking: {
     id: bookingId,
-    created_at,
     startDate,
     endDate,
     numNights,
-    numGuests,
     totalPrice,
     status,
     guests: { fullName: guestName, email },
@@ -107,28 +107,34 @@ function BookingRow({
               See details
             </Menus.Button>
 
-            {status === "unconfirmed" && (
-              <Menus.Button
-                icon={<HiArrowDownOnSquare />}
-                onClick={() => navigate(`/checkin/${bookingId}`)}
-              >
-                Check in
-              </Menus.Button>
-            )}
+            <Can permission={PERMISSIONS.BOOKINGS_CHECKIN}>
+              {status === "unconfirmed" && (
+                <Menus.Button
+                  icon={<HiArrowDownOnSquare />}
+                  onClick={() => navigate(`/checkin/${bookingId}`)}
+                >
+                  Check in
+                </Menus.Button>
+              )}
+            </Can>
 
-            {status === "checked-in" && (
-              <Menus.Button
-                icon={<HiArrowUpOnSquare />}
-                onClick={() => checkout(bookingId)}
-                disabled={isCheckingOut}
-              >
-                Check out
-              </Menus.Button>
-            )}
+            <Can permission={PERMISSIONS.BOOKINGS_CHECKIN}>
+              {status === "checked-in" && (
+                <Menus.Button
+                  icon={<HiArrowUpOnSquare />}
+                  onClick={() => checkout(bookingId)}
+                  disabled={isCheckingOut}
+                >
+                  Check out
+                </Menus.Button>
+              )}
+            </Can>
 
-            <Modal.Open opens="delete">
-              <Menus.Button icon={<HiTrash />}>Delete booking</Menus.Button>
-            </Modal.Open>
+            <Can permission={PERMISSIONS.BOOKINGS_DELETE}>
+              <Modal.Open opens="delete">
+                <Menus.Button icon={<HiTrash />}>Delete booking</Menus.Button>
+              </Modal.Open>
+            </Can>
           </Menus.List>
         </Menus.Menu>
 

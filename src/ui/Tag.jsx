@@ -1,6 +1,8 @@
 import styled from "styled-components";
 
-const Tag = styled.span`
+const Tag = styled.span.withConfig({
+  shouldForwardProp: (prop) => prop !== "type",
+})`
   width: fit-content;
   text-transform: uppercase;
   font-size: 1.1rem;

@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import HeaderMenu from "./HeaderMenu";
 import UserAvatar from "../features/authentication/UserAvatar";
+import HotelSelect from "../features/hotels/HotelSelect";
 
 const StyledHeader = styled.header`
   background-color: var(--color-grey-0);
@@ -16,6 +17,7 @@ const StyledHeader = styled.header`
 function Header() {
   return (
     <StyledHeader>
+      <HotelSelect />
       <UserAvatar />
       <HeaderMenu />
     </StyledHeader>

@@ -1,7 +1,9 @@
 import supabase from "./supabase";
 
-export async function getSettings() {
-  const { data, error } = await supabase.from("settings").select("*").single();
+export async function getSettings(hotelId) {
+  let query = supabase.from("settings").select("*");
+  query = hotelId ? query.eq("hotelId", hotelId) : query.eq("id", 1);
+  const { data, error } = await query.single();
 
   if (error) {
     console.error(error);
@@ -11,13 +13,10 @@ export async function getSettings() {
 }
 
 // We expect a newSetting object that looks like {setting: newValue}
-export async function updateSetting(newSetting) {
-  const { data, error } = await supabase
-    .from("settings")
-    .update(newSetting)
-    // There is only ONE row of settings, and it has the ID=1, and so this is the updated one
-    .eq("id", 1)
-    .single();
+export async function updateSetting(newSetting, hotelId) {
+  let query = supabase.from("settings").update(newSetting);
+  query = hotelId ? query.eq("hotelId", hotelId) : query.eq("id", 1);
+  const { data, error } = await query.select().single();
 
   if (error) {
     console.error(error);

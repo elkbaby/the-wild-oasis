@@ -14,7 +14,9 @@ const StyledStat = styled.div`
   row-gap: 0.4rem;
 `;
 
-const Icon = styled.div`
+const Icon = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "color",
+})`
   grid-row: 1 / -1;
   aspect-ratio: 1;
   border-radius: 50%;

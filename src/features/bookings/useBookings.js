@@ -2,9 +2,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBookings } from "../../services/apiBookings";
 import { useSearchParams } from "react-router-dom";
 import { PAGE_SIZE } from "../../utils/constants";
+import { useHotel } from "../../context/HotelContext";
 
 export function useBookings() {
   const queryClient = useQueryClient();
+  const { hotelId, selectedHotelId } = useHotel();
   const [searchParams] = useSearchParams();
 
   // FILTER
@@ -26,11 +28,11 @@ export function useBookings() {
   // QUERY
   const {
     isLoading,
-    data: { data: bookings, count } = {},
+    data: { data: bookings = [], count = 0 } = {},
     error,
   } = useQuery({
-    queryKey: ["bookings", filter, sortBy, page],
-    queryFn: () => getBookings({ filter, sortBy, page }),
+    queryKey: ["hotels", selectedHotelId, "bookings", filter, sortBy, page],
+    queryFn: () => getBookings({ filter, sortBy, page, hotelId }),
   });
 
   // PRE-FETCHING
@@ -38,14 +40,30 @@ export function useBookings() {
 
   if (page < pageCount)
     queryClient.prefetchQuery({
-      queryKey: ["bookings", filter, sortBy, page + 1],
-      queryFn: () => getBookings({ filter, sortBy, page: page + 1 }),
+      queryKey: [
+        "hotels",
+        selectedHotelId,
+        "bookings",
+        filter,
+        sortBy,
+        page + 1,
+      ],
+      queryFn: () =>
+        getBookings({ filter, sortBy, page: page + 1, hotelId }),
     });
 
   if (page > 1)
     queryClient.prefetchQuery({
-      queryKey: ["bookings", filter, sortBy, page - 1],
-      queryFn: () => getBookings({ filter, sortBy, page: page - 1 }),
+      queryKey: [
+        "hotels",
+        selectedHotelId,
+        "bookings",
+        filter,
+        sortBy,
+        page - 1,
+      ],
+      queryFn: () =>
+        getBookings({ filter, sortBy, page: page - 1, hotelId }),
     });
 
   return { isLoading, error, bookings, count };

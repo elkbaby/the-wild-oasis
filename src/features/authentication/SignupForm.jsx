@@ -5,17 +5,20 @@ import Form from "../../ui/Form";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import { useSignup } from "./useSignup";
+import Select from "../../ui/Select";
+import { useHotel } from "../../context/HotelContext";
 
 // Email regex: /\S+@\S+\.\S+/
 
 function SignupForm() {
   const { signup, isLoading } = useSignup();
+  const { hotelId, role: currentRole } = useHotel();
   const { register, formState, getValues, handleSubmit, reset } = useForm();
   const { errors } = formState;
 
-  function onSubmit({ fullName, email, password }) {
+  function onSubmit({ fullName, email, password, role }) {
     signup(
-      { fullName, email, password },
+      { fullName, email, password, role, hotelId },
       {
         onSettled: () => reset(),
       },
@@ -32,6 +35,25 @@ function SignupForm() {
           {...register("fullName", { required: "This field is required" })}
         />
       </FormRow>
+
+      {hotelId && (
+        <FormRow label="Hotel role" error={errors?.role?.message}>
+          <Select
+            id="role"
+            disabled={isLoading}
+            defaultValue="front_desk"
+            {...register("role", { required: "Select a role" })}
+            options={[
+              { value: "front_desk", label: "Front desk" },
+              { value: "finance", label: "Finance" },
+              { value: "manager", label: "Manager" },
+              ...(currentRole === "owner"
+                ? [{ value: "owner", label: "Owner" }]
+                : []),
+            ]}
+          />
+        </FormRow>
+      )}
 
       <FormRow label="Email address" error={errors?.email?.message}>
         <Input

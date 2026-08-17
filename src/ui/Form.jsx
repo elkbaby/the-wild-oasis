@@ -1,6 +1,8 @@
 import styled, { css } from "styled-components";
 
-const Form = styled.form`
+const Form = styled.form.withConfig({
+  shouldForwardProp: (prop) => prop !== "type",
+})`
   ${(props) =>
     props.type === "regular" &&
     css`

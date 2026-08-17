@@ -1,8 +1,11 @@
 //从supabase复制过来，可参考已有项目文件
 import supabase, { supabaseUrl } from "./supabase";
 
-export async function getCabins() {
-  const { data, error } = await supabase.from("cabins").select("*");
+export async function getCabins(hotelId) {
+  let query = supabase.from("cabins").select("*");
+  if (hotelId) query = query.eq("hotelId", hotelId);
+
+  const { data, error } = await query;
 
   if (error) {
     console.error(error);
@@ -23,53 +26,52 @@ const { data, error } = await supabase
 
 */
 
-export async function createEditCabin(newCabin, id) {
+export async function createEditCabin(newCabin, id, hotelId) {
   const hasImagePath = newCabin.image?.startsWith?.(supabaseUrl);
 
-  const imageName = `${Math.random()}-${newCabin.image.name}`.replaceAll(
-    "/",
-    "",
-  );
+  const imageName = hasImagePath
+    ? null
+    : `${hotelId ?? "legacy"}/${Math.random()}-${newCabin.image.name}`.replaceAll(
+        "//",
+        "/",
+      );
   const imagePath = hasImagePath
     ? newCabin.image
     : `${supabaseUrl}/storage/v1/object/public/cabin-images/${imageName}`;
 
-  // 1. Create/edit cabin
+  // Upload first so a failed upload can never delete an existing cabin.
+  if (!hasImagePath) {
+    const { error: storageError } = await supabase.storage
+      .from("cabin-images")
+      .upload(imageName, newCabin.image);
+
+    if (storageError) throw new Error("Cabin image could not be uploaded");
+  }
+
   let query = supabase.from("cabins");
+  const cabinData = { ...newCabin, image: imagePath };
+  if (hotelId) cabinData.hotelId = hotelId;
 
-  // A) CREATE
-  if (!id) query = query.insert([{ ...newCabin, image: imagePath }]);
+  if (!id) query = query.insert([cabinData]);
 
-  // B) EDIT
-  if (id) query = query.update({ ...newCabin, image: imagePath }).eq("id", id);
+  if (id) {
+    query = query.update(cabinData).eq("id", id);
+    if (hotelId) query = query.eq("hotelId", hotelId);
+  }
 
   const { data, error } = await query.select().single();
 
   if (error) {
+    if (!hasImagePath)
+      await supabase.storage.from("cabin-images").remove([imageName]);
     console.error(error);
     throw new Error("Cabin could not be created");
-  }
-
-  // 2. Upload image
-  if (hasImagePath) return data;
-
-  const { error: storageError } = await supabase.storage
-    .from("cabin-images")
-    .upload(imageName, newCabin.image);
-
-  // 3. Delete the cabin IF there was an error uplaoding image
-  if (storageError) {
-    await supabase.from("cabins").delete().eq("id", data.id);
-    console.error(storageError);
-    throw new Error(
-      "Cabin image could not be uploaded and the cabin was not created",
-    );
   }
 
   return data;
 }
 
-export async function deleteCabin(id) {
+export async function deleteCabin(id, hotelId) {
   /*
   //从supadata复制过来 可能与原项目不同
 const { error } = await supabase
@@ -79,7 +81,9 @@ const { error } = await supabase
 
  */
   //原项目是const { data, error }
-  const { data, error } = await supabase.from("cabins").delete().eq("id", id);
+  let query = supabase.from("cabins").delete().eq("id", id);
+  if (hotelId) query = query.eq("hotelId", hotelId);
+  const { data, error } = await query;
 
   if (error) {
     console.error(error);

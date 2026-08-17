@@ -6,7 +6,12 @@ import {
   HiOutlineHome,
   HiOutlineHomeModern,
   HiOutlineUsers,
+  HiOutlineCalendarDateRange,
+  HiOutlineChartBar,
+  HiOutlineClipboardDocumentList,
 } from "react-icons/hi2";
+import { useHotel } from "../context/HotelContext";
+import { PERMISSIONS } from "../features/hotels/permissions";
 
 const NavList = styled.ul`
   display: flex;
@@ -54,39 +59,72 @@ const StyledNavLink = styled(NavLink)`
 `;
 
 function MainNav() {
+  const { can } = useHotel();
+
+  const navigation = [
+    {
+      to: "/dashboard",
+      label: "Home",
+      icon: <HiOutlineHome />,
+      permission: PERMISSIONS.DASHBOARD_VIEW,
+    },
+    {
+      to: "/bookings",
+      label: "Bookings",
+      icon: <HiOutlineCalendarDays />,
+      permission: PERMISSIONS.BOOKINGS_VIEW,
+    },
+    {
+      to: "/calendar",
+      label: "Room calendar",
+      icon: <HiOutlineCalendarDateRange />,
+      permission: PERMISSIONS.CALENDAR_VIEW,
+    },
+    {
+      to: "/cabins",
+      label: "Cabins",
+      icon: <HiOutlineHomeModern />,
+      permission: PERMISSIONS.CABINS_VIEW,
+    },
+    {
+      to: "/reports",
+      label: "Reports",
+      icon: <HiOutlineChartBar />,
+      permission: PERMISSIONS.REPORTS_VIEW,
+    },
+    {
+      to: "/audit",
+      label: "Audit log",
+      icon: <HiOutlineClipboardDocumentList />,
+      permission: PERMISSIONS.AUDIT_VIEW,
+    },
+    {
+      to: "/users",
+      label: "Users",
+      icon: <HiOutlineUsers />,
+      permission: PERMISSIONS.USERS_MANAGE,
+    },
+    {
+      to: "/settings",
+      label: "Settings",
+      icon: <HiOutlineCog6Tooth />,
+      permission: PERMISSIONS.SETTINGS_MANAGE,
+    },
+  ];
+
   return (
     <nav>
       <NavList>
-        <li>
-          <StyledNavLink to="/dashboard">
-            <HiOutlineHome />
-            <span>Home</span>
-          </StyledNavLink>
-        </li>
-        <li>
-          <StyledNavLink to="/bookings">
-            <HiOutlineCalendarDays />
-            <span>Bookings</span>
-          </StyledNavLink>
-        </li>
-        <li>
-          <StyledNavLink to="/cabins">
-            <HiOutlineHomeModern />
-            <span>Cabins</span>
-          </StyledNavLink>
-        </li>
-        <li>
-          <StyledNavLink to="/users">
-            <HiOutlineUsers />
-            <span>Users</span>
-          </StyledNavLink>
-        </li>
-        <li>
-          <StyledNavLink to="/settings">
-            <HiOutlineCog6Tooth />
-            <span>Settings</span>
-          </StyledNavLink>
-        </li>
+        {navigation
+          .filter((item) => can(item.permission))
+          .map((item) => (
+            <li key={item.to}>
+              <StyledNavLink to={item.to}>
+                {item.icon}
+                <span>{item.label}</span>
+              </StyledNavLink>
+            </li>
+          ))}
       </NavList>
     </nav>
   );

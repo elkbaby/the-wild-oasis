@@ -1,6 +1,6 @@
 import supabase, { supabaseUrl } from "./supabase";
 
-export async function signup({ fullName, email, password }) {
+export async function signup({ fullName, email, password, hotelId, role }) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -13,6 +13,14 @@ export async function signup({ fullName, email, password }) {
   });
 
   if (error) throw new Error(error.message);
+
+  if (hotelId && data.user) {
+    const { error: membershipError } = await supabase
+      .from("hotel_members")
+      .insert({ hotelId, userId: data.user.id, role });
+
+    if (membershipError) throw new Error(membershipError.message);
+  }
 
   return data;
 }

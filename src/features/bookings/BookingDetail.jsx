@@ -18,6 +18,8 @@ import Modal from "../../ui/Modal";
 import ConfirmDelete from "../../ui/ConfirmDelete";
 import { useDeleteBooking } from "./useDeleteBooking";
 import Empty from "../../ui/Empty";
+import Can from "../../ui/Can";
+import { PERMISSIONS } from "../hotels/permissions";
 
 const HeadingGroup = styled.div`
   display: flex;
@@ -57,39 +59,45 @@ function BookingDetail() {
       <BookingDataBox booking={booking} />
 
       <ButtonGroup>
-        {status === "unconfirmed" && (
-          <Button onClick={() => navigate(`/checkin/${bookingId}`)}>
-            Check in
-          </Button>
-        )}
+        <Can permission={PERMISSIONS.BOOKINGS_CHECKIN}>
+          {status === "unconfirmed" && (
+            <Button onClick={() => navigate(`/checkin/${bookingId}`)}>
+              Check in
+            </Button>
+          )}
+        </Can>
 
-        {status === "checked-in" && (
-          <Button
-            icon={<HiArrowUpOnSquare />}
-            onClick={() => checkout(bookingId)}
-            disabled={isCheckingOut}
-          >
-            Check out
-          </Button>
-        )}
+        <Can permission={PERMISSIONS.BOOKINGS_CHECKIN}>
+          {status === "checked-in" && (
+            <Button
+              icon={<HiArrowUpOnSquare />}
+              onClick={() => checkout(bookingId)}
+              disabled={isCheckingOut}
+            >
+              Check out
+            </Button>
+          )}
+        </Can>
 
-        <Modal>
-          <Modal.Open opens="delete">
-            <Button variation="danger">Delete booking</Button>
-          </Modal.Open>
+        <Can permission={PERMISSIONS.BOOKINGS_DELETE}>
+          <Modal>
+            <Modal.Open opens="delete">
+              <Button variation="danger">Delete booking</Button>
+            </Modal.Open>
 
-          <Modal.Window name="delete">
-            <ConfirmDelete
-              resourceName="booking"
-              disabled={isDeleting}
-              onConfirm={() =>
-                deleteBooking(bookingId, {
-                  onSettled: () => navigate(-1),
-                })
-              }
-            />
-          </Modal.Window>
-        </Modal>
+            <Modal.Window name="delete">
+              <ConfirmDelete
+                resourceName="booking"
+                disabled={isDeleting}
+                onConfirm={() =>
+                  deleteBooking(bookingId, {
+                    onSettled: () => navigate(-1),
+                  })
+                }
+              />
+            </Modal.Window>
+          </Modal>
+        </Can>
 
         <Button variation="secondary" onClick={moveBack}>
           Back

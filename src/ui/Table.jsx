@@ -10,7 +10,9 @@ const StyledTable = styled.div`
   overflow: hidden;
 `;
 
-const CommonRow = styled.div`
+const CommonRow = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "columns",
+})`
   display: grid;
   grid-template-columns: ${(props) => props.columns};
   column-gap: 2.4rem;

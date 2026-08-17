@@ -1,6 +1,8 @@
 import styled, { css } from "styled-components";
 
-const Row = styled.div`
+const Row = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "type",
+})`
   display: flex;
 
   ${(props) =>
